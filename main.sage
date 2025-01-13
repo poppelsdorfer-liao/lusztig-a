@@ -15,6 +15,7 @@ from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
 
+import itertools
 
 
 
@@ -160,10 +161,7 @@ def a_function_lusztig(z):
     return -min_power if min_power<0 else 0
 
 
-def check_a_func_agree():
-    print(f'\n\n\na function value for elements of S_{n}:\n')
-    for z in Welements: 
-        print(z.to_permutation(),a_function_lusztig(z))
+
 
 #######################################################################################
 
@@ -184,12 +182,23 @@ def get_multiplicities(lst):
     return Counter(lst)
 
 
-#### check that this agrees with the previous a function via Lusztigs definition
-if all(a_function(w.to_permutation()) == a_function_lusztig(w) for w in Welements):
-    print('\n\n\nthe two definitions of the a function agree')
-else:
-    raise ValueError('the two definitions of the a function do not agree')
+#### check that this agrees with the previous a function via Lusztigs definition, but h is slow for n>=4
 
+def check_a_func_agree():
+    print(f'\n\n\na function values via the two definitions for elements of S_{n}:\n')
+    data = []
+    for z in Welements: 
+        zz = z.to_permutation()
+        a1 = a_function_lusztig(z)
+        a2 = a_function(zz)
+        print('permutation, a_function_lusztig, a_function_RSK:',zz,a1,a2)
+        data.append((zz,a1,a2))
+
+        if a1 != a2: raise ValueError('the two definitions of the a function do not agree')
+    #headers = ['permutation', 'a_function_lusztig', 'a_function_RSK']
+    #print(tabulate(data, headers=headers, tablefmt='grid'))
+
+#check_a_func_agree()
 
 #######################################################################################
 
@@ -235,34 +244,38 @@ def a_function_table(n):
 
     return sorted_zipped_list,D
 
+data, D = sorted_result = a_function_table(n)
 
 
 
-# Example usage
-data, D = sorted_result = a_function_table(3)
+#######################################################################################
+
+## --- distinguished involution as max min coset reps?
+
+#######################################################################################
 
 
 
-def bruhat_graph_in_cell(wPal, i=2):
-    grouped_dict = defaultdict(list)
-    for t in wPal:
-        key = t[i]  # The ith entry of the tuple
-        grouped_dict[key].append(t)
-    print(grouped_dict)
-    for key, value in grouped_dict.items():
-        print(f"a-function value: {key}")
-        graph = nx.Graph()
-        vertices = [v[0] for v in value]  # Assuming the first entry is the vertex
-        graph.add_nodes_from(vertices)
-        # Add edges based on some logic, here we add edges between consecutive vertices
-        for j in range(len(vertices) - 1):
-            graph.add_edge(vertices[j], vertices[j + 1])
-        nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=2000, font_size=16)
-        plt.show()
-        for v in value:
-            print(v)
-        print("\n")
+
+def parabolics(n):
+    original_set = [i for i in range(1,n)]
+
+    # Generate all subsets
+    all_subsets = []
+    for r in range(len(original_set) + 1):
+        subsets = list(itertools.combinations(original_set, r))
+        all_subsets.extend(subsets)
+    return all_subsets
 
 
-#bruhat_graph_in_cell(data)
 
+def max_min_coset_reps(n):
+    W = WeylGroup(f"A{n-1}")
+    Welements= W.list()
+    parabolics_list = parabolics(n)
+    data = [[w.coset_representative(p) for w in Welements] for p in parabolics_list]
+    data = [sorted(x,key=lambda x: (x.length(),x.reduced_word())) for x in data]
+    data = [x[-1].to_permutation() for x in data]
+    return data
+
+print(max_min_coset_reps(3))#### this is not right
