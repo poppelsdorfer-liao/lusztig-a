@@ -1,6 +1,6 @@
 print("using RSK correspondence to calculate Lusztig's a function")
 
-
+reset()
 #######################################################################################
 
 ## --- python packages for plotting the results
@@ -21,21 +21,43 @@ import itertools
 
 #######################################################################################
 
-## --- sagemath uses another set of generator T_i = qH_i for the Iwahori-Hecke algebra if we set the scalars as follows
+## --- Global variables: weyl group, hecke algebra, KL basis elements
 
 #######################################################################################
 
 n = 4
 
 R.<q> = LaurentPolynomialRing(QQ)
+
+
+###### Weyl group
+W = WeylGroup(f"A{n-1}")
+Welements= W.list()
+#Welements = list(sorted(Welements,key=lambda x: (x.length(),x.reduced_word())))
+#this is the order of the basis elements if below we use IwahoriHeckeAlgebra('A3') instead of W, I hate this
+
+print(f'\n\n\nelements of S_{n} as permutations:\n', [x.to_permutation() for x in Welements])
+
+e = Welements[0]
+s1=Welements[1]
+s2=Welements[2]
+
+##### hecke algebra, sagemath uses another set of generator T_i = qH_i for the Iwahori-Hecke algebra if we set the scalars as follows, where H_i is our usual generator
 scalar = q
 
-H = IwahoriHeckeAlgebra(f'A{n-1}', -scalar^2,1)
+H = IwahoriHeckeAlgebra(W, -scalar^2,1)
 T = H.T()
 
 
 tgen = T.algebra_generators()
 H_simple = [t/scalar for t in tgen]
+
+
+#######################################################################################
+
+## --- Writing the Hecke elements in my normalization
+
+#######################################################################################
 
 
 def standard_basis_element_from_word(list_of_indices):
@@ -44,12 +66,6 @@ def standard_basis_element_from_word(list_of_indices):
         out *= H_simple[i-1]  
     return out
 
-
-#######################################################################################
-
-## --- Writing the Hecke Welements in my normalization
-
-#######################################################################################
 
 def ordering_Sn_elements(n):
     ##### reduced words in the simple reflections, in the order of the T basis Welements in sage
@@ -78,9 +94,9 @@ def hecke_in_my_normalization(t,detailed=False):###### converts the T basis to t
     ##### now need to figure out which q power to multiply by, namely the length of the corresponding permutation
 
     gens = list(t.parent().algebra_generators())
-    n = len(gens) +1 ##### size of Sn
-
-    perms = ordering_Sn_elements(n)
+    #n = len(gens) +1 ##### size of Sn
+    #perms = ordering_Sn_elements(n)
+    perms = [x.reduced_word() for x in Welements]
     out = [0]*len(perms)
     for i,(coeff,word) in enumerate(zip(coeffs,perms)):
         if coeff!=0: out[i] = coeff*(scalar**len(word))
@@ -94,6 +110,20 @@ def hecke_in_my_normalization(t,detailed=False):###### converts the T basis to t
 
 print('\n\n\nthe quadratic relation in my normalization: H[1]^2 == ')
 t = hecke_in_my_normalization(H_simple[0]^2,True) ### normalization check
+
+#### stanard basis elements in H(S3)
+h1 = standard_basis_element_from_word([1])
+h2 = standard_basis_element_from_word([2])
+h12 = standard_basis_element_from_word([1,2])
+h21 = standard_basis_element_from_word([2,1])
+h121 = standard_basis_element_from_word([1,2,1])
+
+##### KL basis elements in H(S3)
+c1 = standard_basis_element_from_word([1])+q
+c2 = standard_basis_element_from_word([2])+q
+c12 = c1*c2
+c21 = c2*c1
+c121 = c12*c1 - c1
 
 
 #######################################################################################
@@ -115,8 +145,6 @@ print('\n\n\nthe KL basis element of H[1,2,1] in my normalization: ')
 t = hecke_in_my_normalization( T(KL_basis_list[-1]),True)
 
 
-
-
 #######################################################################################
 
 ## --- compute the a function for the symmetric group S_n a la lusztig's definition
@@ -124,19 +152,6 @@ t = hecke_in_my_normalization( T(KL_basis_list[-1]),True)
 #######################################################################################
 
 
-
-#kl_polynom_matrix = matrix([hecke_in_my_normalization(T(x)) for x in KL_basis_list])
-#### KL basis in terms of the standard H basis
-
-W = WeylGroup(f"A{n-1}")
-Welements= W.list()
-Welements = list(sorted(Welements,key=lambda x: (x.length(),x.reduced_word())))
-
-print(f'\n\n\nelements of S_{n} as permutations:\n', [x.to_permutation() for x in Welements])
-
-e = Welements[0]
-s1=Welements[1]
-s2=Welements[2]
 
 def h(x,y,z,detailed=False):
 
@@ -185,7 +200,7 @@ def get_multiplicities(lst):
 #### check that this agrees with the previous a function via Lusztigs definition, but h is slow for n>=4
 
 def check_a_func_agree():
-    print(f'\n\n\na function values via the two definitions for elements of S_{n}:\n')
+    print(f'\n\n\na function values via the two definitions for W_elements of S_{n}:\n')
     data = []
     for z in Welements: 
         zz = z.to_permutation()
@@ -211,33 +226,33 @@ def a_function_table(n):
     W = WeylGroup(f"A{n-1}")
     # [s1,s2,s3] = W.simple_reflections()
     KL = KazhdanLusztigPolynomial(W,q)
-    Welements= W.list()
+
+    sn_elements= W.list()
     KLpolys = [KL.P(Welements[0],s) for s in Welements]
-    sn_elements = [w.to_permutation() for w in Welements]
 
-
-    out= [a_function(w) for w in sn_elements]
-    lengths = [Permutation(list(w)).number_of_inversions() for w in sn_elements]
+    out= [a_function(w.to_permutation()) for w in sn_elements]
+    
     count = get_multiplicities(out)
     #print('values and their multiplicities:')
     #print(count)
     #print('total number of values:', len(count))
     #print(f'number of partitions of {n}:',number_of_partitions(n) )
-    zipped_list = list(zip(sn_elements, KLpolys, out, lengths))
-    sorted_zipped_list = sorted(zipped_list, key=lambda x: (x[-2], x[-1]))
+    zipped_list = list(zip(sn_elements, KLpolys, out))
+    sorted_zipped_list = sorted(zipped_list, key=lambda x: (x[-1], x[0].length()))
     
     D = []
     # Prepare data for tabulate
     table_data = []
-    for w,P, a, l in sorted_zipped_list:
+    for w,P, a in sorted_zipped_list:
+        l = w.length()
         aux = l - 2 * P.degree()
-        row = [w, P, a,  aux,l]
+        row = [w.to_permutation(), w.reduced_word(), P, a,  aux,l]
         if aux==a: 
-            D.append((w,P,a,l)) 
+            D.append(w) 
             row = [f"\033[1;31m{cell}\033[0m" for cell in row]  # Red color
         table_data.append(row)
 
-    headers = ['w', 'P(e,w)', 'a(w)', 'l(w) - 2 deg(P)', 'l(w)']
+    headers = ['w', 'rex' , 'P(e,w)', 'a(w)', 'l(w) - 2 deg(P)', 'l(w)']
 
     print(f'\n\n\ntable of a-function values for S_{n}')
     print(tabulate(table_data, headers=headers, tablefmt='grid'))
@@ -245,6 +260,65 @@ def a_function_table(n):
     return sorted_zipped_list,D
 
 data, D = sorted_result = a_function_table(n)
+
+
+
+
+
+
+#######################################################################################
+
+## --- filtration of the hecke algebra defined by KL basis elements having a-function values >= given value
+
+#######################################################################################
+
+
+class hecke_subquotient_via_lusztig_afunc():
+    @staticmethod #### just to make the class independent of global functions
+    def a_function(w):
+        w = w.to_permutation()
+        rsk=RSK(w)
+        Q=rsk[1].conjugate()
+        return sum([len(z)*(len(z)-1)//2 for z in Q])
+
+    def __init__(self, W ,a_value):
+        Welements = list(sorted(W.list(),key=lambda x: (x.length(),x.reduced_word())))
+        self.weyl_group = W
+        self.a_value = a_value
+        self.W_elements = [w for w in Welements if hecke_subquotient_via_lusztig_afunc.a_function(w)==a_value]
+        self.indices = [Welements.index(w) for w in self.W_elements]
+
+        self.hecke_alg = IwahoriHeckeAlgebra(W, -scalar^2,1)
+        self.KL_basis = self.hecke_alg.C()
+        self.KL_basis_list = list(self.KL_basis.basis())
+
+        self.dim = len(self.indices)
+
+    def __repr__(self):
+        return f'subquotient of the Hecke algebra of type A{self.weyl_group.rank} having lusztigs a function value {self.a_value})'
+
+
+    def coset_of(self,t):##### assume t is in the hecke algebra
+        t = self.KL_basis(t)
+        coeffs = t.to_vector()
+        result_vec =  [0]*len(self.KL_basis_list)
+        for i in self.indices:
+            result_vec[i] = coeffs[i]
+        out = 0
+        for i,coeff in enumerate(result_vec):
+            out += coeff * self.KL_basis_list[i]
+
+        return out
+
+
+
+sgn = hecke_subquotient_via_lusztig_afunc(W,0)
+V = hecke_subquotient_via_lusztig_afunc(W,3)
+
+
+
+
+
 
 
 
