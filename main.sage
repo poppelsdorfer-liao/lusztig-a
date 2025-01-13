@@ -240,6 +240,7 @@ def a_function_table(n):
     zipped_list = list(zip(sn_elements, KLpolys, out))
     sorted_zipped_list = sorted(zipped_list, key=lambda x: (x[-1], x[0].length()))
     
+    out = []
     D = []
     # Prepare data for tabulate
     table_data = []
@@ -247,6 +248,7 @@ def a_function_table(n):
         l = w.length()
         aux = l - 2 * P.degree()
         row = [w.to_permutation(), w.reduced_word(), P, a,  aux,l]
+        out.append(row)
         if aux==a: 
             D.append(w) 
             row = [f"\033[1;31m{cell}\033[0m" for cell in row]  # Red color
@@ -257,7 +259,7 @@ def a_function_table(n):
     print(f'\n\n\ntable of a-function values for S_{n}')
     print(tabulate(table_data, headers=headers, tablefmt='grid'))
 
-    return sorted_zipped_list,D
+    return out,D
 
 data, D = sorted_result = a_function_table(n)
 
@@ -316,11 +318,17 @@ sgn = hecke_subquotient_via_lusztig_afunc(W,0)
 V = hecke_subquotient_via_lusztig_afunc(W,3)
 
 
+##### can at least compare dimension with the specht mods
+SGA = SymmetricGroupAlgebra(QQ, n)
+partition = None 
+for p in data:
+    if p[3] == 3:
+        partition = RSK(p[0])[1].conjugate().shape()
 
+        break
 
-
-
-
+SM = SGA.specht_module(partition)
+print(SM.dimension()^2 == V.dim)
 
 #######################################################################################
 
