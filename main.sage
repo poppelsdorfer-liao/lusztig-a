@@ -297,7 +297,7 @@ class hecke_subquotient_via_lusztig_afunc():
         self.dim = len(self.indices)
 
     def __repr__(self):
-        return f'subquotient of the Hecke algebra of type A{self.weyl_group.rank} having lusztigs a function value {self.a_value})'
+        return f'subquotient of the Hecke algebra of type A{self.weyl_group.rank()} having lusztigs a function value {self.a_value})'
 
 
     def coset_of(self,t):##### assume t is in the hecke algebra
