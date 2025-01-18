@@ -27,7 +27,7 @@ import itertools
 
 n = 4
 
-R.<q> = LaurentPolynomialRing(QQ)
+R.<v> = LaurentPolynomialRing(QQ)
 
 
 ###### Weyl group
@@ -43,7 +43,7 @@ s1=Welements[1]
 s2=Welements[2]
 
 ##### hecke algebra, sagemath uses another set of generator T_i = qH_i for the Iwahori-Hecke algebra if we set the scalars as follows, where H_i is our usual generator
-scalar = q
+scalar = v
 
 H = IwahoriHeckeAlgebra(W, -scalar^2,1)
 T = H.T()
@@ -91,7 +91,7 @@ def hecke_in_my_normalization(t,detailed=False):###### converts the T basis to t
     #basis = t.parent().gens()
     coeffs = t.to_vector()
 
-    ##### now need to figure out which q power to multiply by, namely the length of the corresponding permutation
+    ##### now need to figure out which v power to multiply by, namely the length of the corresponding permutation
 
     gens = list(t.parent().algebra_generators())
     #n = len(gens) +1 ##### size of Sn
@@ -119,8 +119,8 @@ h21 = standard_basis_element_from_word([2,1])
 h121 = standard_basis_element_from_word([1,2,1])
 
 ##### KL basis elements in H(S3)
-c1 = standard_basis_element_from_word([1])+q
-c2 = standard_basis_element_from_word([2])+q
+c1 = standard_basis_element_from_word([1])+v
+c2 = standard_basis_element_from_word([2])+v
 c12 = c1*c2
 c21 = c2*c1
 c121 = c12*c1 - c1
@@ -172,7 +172,7 @@ def a_function_lusztig(z):
     aux = [power for dic in aux for power in dic.keys()]
     #print('z,aux:',z.to_permutation(),aux)
 
-    min_power = min(aux) if aux else 0  # minimum power of q in the coefficients
+    min_power = min(aux) if aux else 0  # minimum power of v in the coefficients
     return -min_power if min_power<0 else 0
 
 
@@ -225,7 +225,7 @@ def a_function_table(n):
         
     W = WeylGroup(f"A{n-1}")
     # [s1,s2,s3] = W.simple_reflections()
-    KL = KazhdanLusztigPolynomial(W,q)
+    KL = KazhdanLusztigPolynomial(W,v)
 
     sn_elements= W.list()
     KLpolys = [KL.P(Welements[0],s) for s in Welements]
