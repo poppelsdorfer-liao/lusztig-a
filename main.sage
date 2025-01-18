@@ -25,7 +25,7 @@ import itertools
 
 #######################################################################################
 
-n = 4
+n = 3
 
 R.<v> = LaurentPolynomialRing(QQ)
 
@@ -45,12 +45,13 @@ s2=Welements[2]
 ##### hecke algebra, sagemath uses another set of generator T_i = qH_i for the Iwahori-Hecke algebra if we set the scalars as follows, where H_i is our usual generator
 scalar = v
 
-H = IwahoriHeckeAlgebra(W, -scalar^2,1)
+H = IwahoriHeckeAlgebra(W, scalar^-2,-1)
 T = H.T()
 
 
 tgen = T.algebra_generators()
-H_simple = [t/scalar for t in tgen]
+H_simple = [t*scalar for t in tgen]
+
 
 
 #######################################################################################
@@ -99,7 +100,7 @@ def hecke_in_my_normalization(t,detailed=False):###### converts the T basis to t
     perms = [x.reduced_word() for x in Welements]
     out = [0]*len(perms)
     for i,(coeff,word) in enumerate(zip(coeffs,perms)):
-        if coeff!=0: out[i] = coeff*(scalar**len(word))
+        if coeff!=0: out[i] = coeff/(scalar**len(word))
 
     if detailed: 
         #### now print the result in terms of the simple reflections
@@ -133,7 +134,7 @@ c121 = c12*c1 - c1
 #######################################################################################
 
 
-KL_basis = H.C()
+KL_basis = H.C_prime()
 KL_basis_list = list(KL_basis.basis())
 
 
