@@ -25,7 +25,7 @@ import itertools
 
 #######################################################################################
 
-n = 3
+n = 5
 
 R.<v> = LaurentPolynomialRing(QQ)
 
@@ -36,7 +36,7 @@ Welements= W.list()
 #Welements = list(sorted(Welements,key=lambda x: (x.length(),x.reduced_word())))
 #this is the order of the basis elements if below we use IwahoriHeckeAlgebra('A3') instead of W, I hate this
 
-print(f'\n\n\nelements of S_{n} as permutations:\n', [x.to_permutation() for x in Welements])
+#print(f'\n\n\nelements of S_{n} as permutations:\n', [x.to_permutation() for x in Welements])
 
 e = Welements[0]
 s1=Welements[1]
@@ -110,7 +110,7 @@ def hecke_in_my_normalization(t,detailed=False):###### converts the T basis to t
 
 
 print('\n\n\nthe quadratic relation in my normalization: H[1]^2 == ')
-t = hecke_in_my_normalization(H_simple[0]^2,True) ### normalization check
+#t = hecke_in_my_normalization(H_simple[0]^2,True) ### normalization check
 
 #### stanard basis elements in H(S3)
 h1 = standard_basis_element_from_word([1])
@@ -140,10 +140,10 @@ KL_basis_list = list(KL_basis.basis())
 
 
 print('\n\n\nthe KL basis element of H[1] in my normalization: ')
-t = hecke_in_my_normalization(T(KL_basis[1]),True) 
+#t = hecke_in_my_normalization(T(KL_basis[1]),True) 
 
 print('\n\n\nthe KL basis element of H[1,2,1] in my normalization: ')
-t = hecke_in_my_normalization( T(KL_basis_list[-1]),True)
+#t = hecke_in_my_normalization( T(KL_basis_list[-1]),True)
 
 
 #######################################################################################
